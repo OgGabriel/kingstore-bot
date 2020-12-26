@@ -246,62 +246,66 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 
     if (user.bot) return
 
-    let ticketid = bot.channels.cache.get('775141695963922463')
-    let tag_num = user.tag.replace('#', '-').trim(user.username)
+    let ticketid = "790716789570142208" // ID do canal de ticket
+    let authid = "790732719373549589" // ID do canal do canal de autenticação
 
-    if (reaction.message.channel.id == ticketid && reaction.emoji.name === '🎟') {
+    if (reaction.message.channel.name.includes('ticket-')) {
+        if (reaction.emoji.name === '🔒') {
+            reaction.message.channel.send(new MessageEmbed().setTitle(" :no_entry: **TICKET FECHADO** :no_entry:").setDescription("Esse ticket foi fechado! \nDeletenado canal em 5 segundos...").setFooter(footer))
+            
+            setTimeout(() => {
+                reaction.message.channel.delete()
+                console.log(`${reaction.message.author.username} fechou o ticket ${reaction.message.channel.name}`)
+            }, 5000);
+          }
+        }
 
-        if (reaction.message.guild.channels.cache.filter(c => c.name.includes(tag_num))) return
-        reaction.message.guild.channels.create(`ticket-${tag_num}`, {
-            permissionOverwrites: [
-                {
+    switch (reaction.message.channel.id){
+        case ticketid:
+            if (!reaction.emoji.name == "🎟") return
+            reaction.message.guild.channels.create(`ticket-${getRandomInt(1111, 9999)}`, {
+                permissionOverwrites: [
+                  {
                     id: reaction.message.guild.id,
                     deny: ["VIEW_CHANNEL"]
-                },
-                {
-                    id: "774347864070684693",
-                    allow: ["SEND_MESSAGES", "VIEW_CHANNEL"]
-                },
-                {
+                  },
+
+                  /*{  // para utilizar basta alterar a ID e retirar o comentário
+                      id: "id da role que pode ver o ticket",
+                      allow: ["SEND_MESSAGES", "VIEW_CHANNEL"]
+                  },*/
+                  
+                  {
                     id: user.id,
                     allow: ["SEND_MESSAGES", "VIEW_CHANNEL"]
+                  }
+                ],
+                type: 'text',
+                parent: '792429971095552031' // ID categoria que serão criados os tickets
+              }).then(async channel => {
+          
+                let tick = await channel.send(`<@${user.id}>`, new MessageEmbed().setTitle("Ticket aberto!").setDescription(`Aguarde e você receberá uma resposta`).setColor(cor))
+                console.log(`${user.username} abriu um ticket`)
+                setTimeout(() => {
+                    tick.react('🔒')
+                }, 2000);
+              })
+            break
+        case authid:
+            if (reaction.emoji.name === '🛒'){
+                reaction.message.guild.members.cache.get(user.id).roles.add('792431575685660702') // ID da role de autenticação
                 }
-            ],
-            type: 'text',
-            parent: '775138142105501706'
-        }).then(async channel => {
-            channel.setTopic(user.id)
-            let mssg = await channel.send(`<@${user.id}>`, new MessageEmbed().setTitle("Ticket aberto!").setDescription(`Aguarde pacientemente por uma resposta!`).setColor(purple))
-            mssg.react('🔒')
-            clogs(`${user.username} abriu um ticket`)
-            console.log(`${user.username} abriu um ticket`)
-        })
-    }
-})
-
-bot.on('messageReactionAdd', async (reaction, user) => {
-    if (user.partial) await user.fetch()
-    if (reaction.partial) await reaction.fetch()
-    if (reaction.message.partial) await reaction.message.fetch()
-
-    if (user.bot) return
-    
-    if (reaction.message.channel.id == '775545486211285014'){
-        if (reaction.emoji.name === '🛒'){
-        reaction.message.guild.members.cache.get(user.id).roles.add('773751736434819123')
-        }
-    }
-
-    if (reaction.message.guild.channels.cache.find(c => c.name.includes('ticket-'))) {
-    if (reaction.emoji.name === '🔒') {
-        reaction.message.channel.send(new MessageEmbed().setTitle(" :no_entry: **TICKET FECHADO** :no_entry:").setDescription("Esse ticket foi fechado! \nDeletenado canal em 5 segundos...").setFooter(footer))
+        break
         
-        setTimeout(() => {
-            reaction.message.channel.delete()
-        }, 5000);
-      }
     }
 })
+
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
   
 
-bot.login('token')
+bot.login('NzkwNzA1MjI4NDQ2MDQwMDk1.X-EfoQ.snVQHvTEzFUuqi7HGGR_CZr_n1Y')
